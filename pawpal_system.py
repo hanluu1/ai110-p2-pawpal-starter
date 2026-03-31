@@ -38,7 +38,7 @@ class Pet:
 	species: str
 	age: int
 	health_notes: str
-	owner_id: str
+	owner_id: Optional[str] = None
 	task_list: List[Task] = field(default_factory=list)
 
 	def add_task(self, task: Task) -> None:
@@ -70,10 +70,22 @@ class Owner:
 		raise NotImplementedError
 
 	def add_pet(self, pet: Pet) -> None:
-		raise NotImplementedError
+		if pet.owner_id is not None and pet.owner_id != self.owner_id:
+			raise ValueError("Pet is already assigned to a different owner.")
+
+		for existing_pet in self.pets:
+			if existing_pet.pet_id == pet.pet_id:
+				return
+
+		pet.owner_id = self.owner_id
+		self.pets.append(pet)
 
 	def remove_pet(self, pet_id: str) -> None:
-		raise NotImplementedError
+		for index, pet in enumerate(self.pets):
+			if pet.pet_id == pet_id:
+				pet.owner_id = None
+				del self.pets[index]
+				return
 
 
 @dataclass
